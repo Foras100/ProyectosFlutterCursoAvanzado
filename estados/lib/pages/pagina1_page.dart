@@ -1,4 +1,7 @@
+import 'package:estados/bloc/usuario/usuario_bloc.dart';
+import 'package:estados/models/usuario.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 class Pagina1Page extends StatelessWidget {
@@ -8,9 +11,26 @@ class Pagina1Page extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Pagina 1'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: (){
+              BlocProvider.of<UsuarioBloc>(context).add(BorrarUsuario());
+            },
+          )
+        ],
       ),
-      body: InforrmacionUsuario(),
-     floatingActionButton: FloatingActionButton(
+      body: BlocBuilder<UsuarioBloc, UsuarioState>(
+        builder: (context, state) {
+          if(state.existeUsuario){
+            return InformacionUsuario(state.usuario!);
+          }
+          else{
+            return Center(child: Text('No hay usuario seleccionado'));
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
        onPressed: () => Navigator.pushNamed(context, 'pagina2'),
        child: Icon(Icons.add),
      ),
@@ -18,7 +38,10 @@ class Pagina1Page extends StatelessWidget {
   }
 }
 
-class InforrmacionUsuario extends StatelessWidget {
+class InformacionUsuario extends StatelessWidget {
+  final Usuario usuario;
+  InformacionUsuario(this.usuario);
+
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +54,11 @@ class InforrmacionUsuario extends StatelessWidget {
         children: [
           Text('General', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           Divider(),
-          ListTile(  title: Text('Nombre: ')),
-          ListTile(  title: Text('Edad: ')),
+          ListTile(  title: Text('Nombre: ${usuario.nombre}')),
+          ListTile(  title: Text('Edad: ${usuario.edad}')),
           Text('Profesiones', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           Divider(),
-          ListTile(  title: Text('Profesion 1')),
-          ListTile(  title: Text('Profesion 2')),
-          ListTile(  title: Text('Profesion 3')),
+          ...usuario.profesiones.map((profesion) => ListTile( title: Text(profesion))).toList()
         ],
       )
     );
